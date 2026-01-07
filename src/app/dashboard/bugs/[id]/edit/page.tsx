@@ -1,20 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import BugDetail from "@/components/BugDetail";
+import { useRouter, useParams } from "next/navigation";
 import Layout from "@/components/Layout";
-import { getBugById, Bug } from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { BugForm } from "@/components/BugForm";
+import { getBugById, updateBug, Bug } from "@/lib/api";
 
-export default function BugPage() {
+export default function EditBugPage() {
   const params = useParams();
   const rawId = params.id;
 
   // Convert string | string[] to number
   const bugId = Number(Array.isArray(rawId) ? rawId[0] : rawId);
 
+  const router = useRouter();
   const [bug, setBug] = useState<Bug | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,6 +25,18 @@ export default function BugPage() {
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, [bugId]);
+
+  const handleSubmit = async (data: any) => {
+    if (!bugId) return;
+
+    try {
+      await updateBug(bugId, data);
+      router.push(`/dashboard/bugs/${bugId}`);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update bug.");
+    }
+  };
 
   if (loading)
     return (
@@ -43,13 +54,7 @@ export default function BugPage() {
 
   return (
     <Layout>
-      <Link href={`/dashboard/bugs/${bug.id}/edit`}>
-        <Button className="mt-4">Edit</Button>
-      </Link>
-
-      <div className="p-6">
-        <BugDetail bug={bug} />
-      </div>
+      <BugForm initialValues={bug} onSubmit={handleSubmit} />
     </Layout>
   );
 }

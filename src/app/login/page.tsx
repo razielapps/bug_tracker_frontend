@@ -1,5 +1,5 @@
 "use client"
-import { setToken } from '@/lib/auth';
+import { saveTokens } from '@/lib/auth';
 import api from '@/lib/axios';
 import { useForm } from "react-hook-form"
 import axios from "axios"
@@ -30,8 +30,9 @@ export default function LoginPage() {
         try {
             const res = await axios.post("http://localhost:8000/api/auth/login/", data)
 
-            const token = res.data.access;
-            setToken(token);
+            const access = res.data.access;
+            const refresh = res.data.refresh;
+            saveTokens(access, refresh);
 
             // localStorage.setItem("access_token", res.data.access)
             // localStorage.setItem("refresh_token", res.data.refresh)

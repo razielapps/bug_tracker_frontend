@@ -1,13 +1,13 @@
 import { Menu } from "lucide-react";
 import Link from "next/link";
-import { clearToken } from '@/lib/auth';
+import { clearTokens } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 
 export function Header({ toggleSidebar }: { toggleSidebar: () => void }) {
   const router = useRouter()
   const handleLogOut = () => {
     router.push("/login")
-    clearToken()
+    clearTokens()
   }
   return (
     <header className="flex items-center justify-between px-4 py-3 bg-white border-b dark:bg-gray-800 dark:border-gray-700">

@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
-import { clearToken } from '@/lib/auth';
+import { clearTokens } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from "react";
 
@@ -10,7 +10,7 @@ export function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (v:
   const router = useRouter()
   const handleLogOut = () => {
     router.push("/")
-    clearToken()
+    clearTokens()
   }
 
 

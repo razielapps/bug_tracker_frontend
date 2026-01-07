@@ -1,83 +1,130 @@
-// /lib/api.ts
-import axios from 'axios';
+// lib/api.ts
+import api from './axios';
 
-export async function getProjectDetails(id: string) {
-  const res = await axios.get(`/api/projects/${id}`);
+/* ------------------ Types ------------------ */
+export type Bug = {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+  priority: string;
+  assigned_to?: string;
+  project?: { id: string; name: string };
+  comments?: Comment[];
+  [key: string]: any;
+};
+
+export type Comment = {
+  id: number;
+  text: string;
+  user: string;
+  timestamp: string;
+};
+
+export type Project = {
+  id: number | string;
+  name: string;
+  description: string;
+  created_by: { id: number; username: string; email: string };
+  issues_count?: number;
+  open_issues?: number;
+  closed_issues?: number;
+  [key: string]: any;
+};
+
+/* ------------------ Projects ------------------ */
+export async function getProjects(): Promise<Project[]> {
+  const res = await api.get('/projects/');
   return res.data;
 }
 
-export async function getIssuesByStatus(projectId: string, status: string) {
-  let url = `/api/projects/${projectId}/issues`;
-  if (status !== "all") url += `?status=${status}`;
-  const res = await fetch(url);
-  return res.json();
+export async function getProjectDetails(
+  projectId: string | number
+): Promise<Project> {
+  const res = await api.get(`/projects/${projectId}/`);
+  return res.data;
 }
 
+/* ------------------ Bugs / Issues ------------------ */
+export async function getAllBugs(): Promise<Bug[]> {
+  const res = await api.get('/issues/');
+  return res.data;
+}
 
-// lib/api.ts
+export async function getBugById(
+  bugId: string | number
+): Promise<Bug> {
+  const res = await api.get(`/issues/${bugId}/`);
+  return res.data;
+}
 
-export async function getBugById(id: string) {
-  // Simulate a database delay
-  await new Promise((resolve) => setTimeout(resolve, 200));
+export async function createBug(
+  projectId: string | number,
+  bugData: Partial<Bug>
+): Promise<Bug> {
+  const res = await api.post('/issues/', {
+    ...bugData,
+    project: projectId,
+  });
+  return res.data;
+}
 
-  const mockBugs = [
-    {
-      id: "1",
-      title: "Login form validation fails on empty password",
-      description: "When the password field is left blank and submitted, the form crashes instead of showing an error.",
-      status: "Open",
-      priority: "High",
-      assigned_to: "Alice Johnson",
-      project: {
-        name: "Authentication Module",
-        id: "proj-001",
-      },
-      comments: [
-        {
-          user: "Bob",
-          text: "I think the backend isn't handling empty strings properly.",
-          timestamp: "2025-07-27T14:20:00Z",
-        },
-        {
-          user: "Alice",
-          text: "I'll debug the handler function and report back.",
-          timestamp: "2025-07-28T09:15:00Z",
-        },
-      ],
-    },
-    {
-      id: "2",
-      title: "Dark mode styles not applying on refresh",
-      description: "Users have to toggle dark mode twice for it to take effect after a hard refresh.",
-      status: "In Progress",
-      priority: "Medium",
-      assigned_to: "Daniel Kim",
-      project: {
-        name: "UI Overhaul Project",
-        id: "proj-002",
-      },
-      comments: [
-        {
-          user: "Chloe",
-          text: "Might be a hydration mismatch. Check `_document.tsx`.",
-          timestamp: "2025-07-26T11:00:00Z",
-        },
-      ],
-    },
-    {
-      id: "3",
-      title: "Dashboard chart misaligned on mobile",
-      description: "Charts in the dashboard don't scale properly below 768px width.",
-      status: "Closed",
-      priority: "Low",
-      assigned_to: "Michael O'Neil",
-      project: {
-        name: "Analytics Dashboard",
-        id: "proj-003",
-      },
-      comments: [],
-    },
-  ];
+export async function updateBug(
+  bugId: string | number,
+  updatedData: Partial<Bug>
+): Promise<Bug> {
+  const res = await api.patch(`/issues/${bugId}/`, updatedData);
+  return res.data;
+}
 
-  return mockBugs.find((bug) => bug.id === id) || null;
+export async function updateBugStatus(
+  bugId: string | number,
+  newStatus: string
+): Promise<Bug> {
+  const res = await api.patch(`/issues/${bugId}/`, { status: newStatus });
+  return res.data;
+}
+
+/* ------------------ Comments ------------------ */
+export async function getComments(
+  bugId: string | number
+): Promise<Comment[]> {
+  const res = await api.get('/comments/', {
+    params: { issue: bugId },
+  });
+  return res.data;
+}
+
+export async function createComment(issueId: number, text: string) {
+  try {
+    const response = await api.post("/comments/", {
+      text,
+      issue: issueId, // send the issue ID
+    });
+
+    return response.data; // return the created comment
+  } catch (err: any) {
+    console.error("Error creating comment:", err);
+    throw new Error(err.response?.data?.detail || "Failed to create comment");
+  }
+}
+
+/* ------------------ Filters ------------------ */
+export async function getIssuesByProject(
+  projectId: string | number
+) {
+  const res = await api.get('/issues/', {
+    params: { project: projectId },
+  });
+  return res.data;
+}
+
+export async function getIssuesByStatus(
+  projectId: string | number,
+  status: string
+) {
+  const res = await api.get('/issues/', {
+    params: { project: projectId, status },
+  });
+  return res.data;
 }
