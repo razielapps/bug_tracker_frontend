@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-
+import api from './axios';
 import axios from 'axios';
 // const ACCESS_TOKEN_KEY = 'accessToken';
 
@@ -83,4 +83,75 @@ export function clearTokens() {
 export function isAuthenticated(): boolean {
   const token = getAccessToken();
   return token !== null && token !== undefined;
+}
+
+
+/**
+ * Register a new user
+ */
+export async function registerUser(userData: {
+  username: string;
+  email: string;
+  password: string;
+  password2: string;
+  role: 'developer' | 'reporter';
+  first_name: string;
+  bio?: string;
+}): Promise<{ success: boolean; data?: any; error?: string }> {
+  try {
+    const res = await api.post("/auth/register/",
+      userData
+    );
+    
+    // If registration returns tokens, save them
+    if (res.data.access && res.data.refresh) {
+      saveTokens(res.data.access, res.data.refresh);
+      return { success: true, data: res.data };
+    }
+    
+    return { success: true, data: res.data };
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      // Handle validation errors from backend
+      if (error.response?.data) {
+        return { 
+          success: false, 
+          error: formatValidationErrors(error.response.data) 
+        };
+      }
+    }
+    return { 
+      success: false, 
+      error: "Registration failed. Please try again." 
+    };
+  }
+}
+
+/**
+ * Format validation errors from Django REST Framework
+ */
+function formatValidationErrors(errorData: any): string {
+  if (typeof errorData === 'string') {
+    return errorData;
+  }
+  
+  if (Array.isArray(errorData)) {
+    return errorData.join(', ');
+  }
+  
+  if (typeof errorData === 'object') {
+    const messages: string[] = [];
+    
+    for (const [field, errors] of Object.entries(errorData)) {
+      if (Array.isArray(errors)) {
+        messages.push(`${field}: ${errors.join(', ')}`);
+      } else if (typeof errors === 'string') {
+        messages.push(`${field}: ${errors}`);
+      }
+    }
+    
+    return messages.join('; ');
+  }
+  
+  return "Registration failed";
 }

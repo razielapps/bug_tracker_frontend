@@ -1,4 +1,6 @@
+
 // lib/api.ts
+import { ProjectFormValues } from '@/components/ProjectForm';
 import api from './axios';
 
 /* ------------------ Types ------------------ */
@@ -45,6 +47,8 @@ export async function getProjectDetails(
   return res.data;
 }
 
+
+
 /* ------------------ Bugs / Issues ------------------ */
 export async function getAllBugs(): Promise<Bug[]> {
   const res = await api.get('/issues/');
@@ -69,6 +73,19 @@ export async function createBug(
   return res.data;
 }
 
+
+// export async function updateProject(
+//   id: number,
+//   data: {
+//     name: string;
+//     description?: string;
+//   }
+// ) {
+//   const res = await api.patch(`/projects/${id}/`, data);
+//   return res.data;
+// }
+
+
 export async function updateBug(
   bugId: string | number,
   updatedData: Partial<Bug>
@@ -76,6 +93,26 @@ export async function updateBug(
   const res = await api.patch(`/issues/${bugId}/`, updatedData);
   return res.data;
 }
+
+export async function updateProject(
+  projectId: string | number,
+  updatedData: Partial<ProjectFormValues>
+): Promise<Project> {
+  try {
+    const res = await api.patch(`/projects/${projectId}/`, updatedData);
+    return res.data;
+  } catch (err: any) {
+    // Normalize backend errors
+    const message =
+      err.response?.data?.detail ||
+      err.response?.data?.message ||
+      "You do not have permission to update this project.";
+
+    // Throw, don't alert
+    throw new Error(message);
+  }
+}
+
 
 export async function updateBugStatus(
   bugId: string | number,

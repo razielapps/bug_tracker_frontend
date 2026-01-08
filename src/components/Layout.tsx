@@ -1,20 +1,29 @@
 import { useState } from "react";
-import { Sidebar } from "./Sidebar.tsx";
-import { Header } from "./Header.tsx";
+import { Sidebar } from "./Sidebar";
+import { Header } from "./Header";
+import Footer from "./Footer";
+import TopLoader from "./TopLoader";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="flex h-screen overflow-hidden">
+        <div className="flex min-h-screen flex-col bg-background">
             <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-
-            <div className="flex flex-col flex-1 w-0">
+            
+            <div className="flex flex-col flex-1">
                 <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-
-                <main className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">
-                    {children}
+                  <TopLoader />
+             
+                 
+                  
+                <main className="flex-1 overflow-y-auto">
+                    <div className="github-container py-6">
+                        {children}
+                    </div>
                 </main>
+
+                <Footer />
             </div>
         </div>
     );
