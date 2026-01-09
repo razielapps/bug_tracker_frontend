@@ -88,7 +88,7 @@ function LoginContent() {
                         Sign in to OurBugTracker
                     </h1>
                     <p className="mt-2 text-muted-foreground">
-                        Enter your credentials to access your dashboard. For assignment of roles or test accounts please visit my github/razielapps and connent.
+                        Enter your credentials to access your dashboard. For assignment of roles or test accounts please visit my github/razielapps and reach out.
                     </p>
                 </div>
 
