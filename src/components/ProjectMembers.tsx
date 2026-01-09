@@ -1,6 +1,6 @@
 "use client";
 
-import { User, Shield, Code, UserCheck } from "lucide-react";
+import { User, Shield, Code, UserCheck, User2 } from "lucide-react";
 
 type Member = {
   id: number;
@@ -55,7 +55,7 @@ export default function ProjectMembers({ members }: { members: Member[] }) {
       {members.length === 0 ? (
         <div className="text-center py-6">
           <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
-            <Users className="h-6 w-6 text-muted-foreground" />
+            <User2 className="h-6 w-6 text-muted-foreground" />
           </div>
           <h3 className="text-foreground font-medium mb-2">No members yet</h3>
           <p className="text-sm text-muted-foreground">Add members to collaborate on this project</p>

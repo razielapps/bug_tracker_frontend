@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Layout from "@/components/Layout";
 import Link from "next/link";
 import ProjectMembers from "@/components/ProjectMembers";
-import { Bug, Plus, Users, FileText, Activity } from "lucide-react";
+import { Bug, Plus, User2, FileText, Activity } from "lucide-react";
 import {
   getProjectDetails,
   getIssuesByProject,
@@ -43,6 +43,22 @@ export default function ProjectPage() {
 
     fetchData();
   }, [projectId]);
+
+  // Get unique members count - handles duplicates within this project
+  const getUniqueMembersCount = (members: any[] | null | undefined) => {
+    if (!members || !Array.isArray(members)) return 0;
+    
+    // Use a Set to track unique user IDs
+    const uniqueUserIds = new Set();
+    
+    members.forEach(member => {
+      if (member?.user_id) {
+        uniqueUserIds.add(member.user_id);
+      }
+    });
+    
+    return uniqueUserIds.size;
+  };
 
   // Loading State
   if (loading) {
@@ -84,6 +100,7 @@ export default function ProjectPage() {
 
   const openIssues = issues.filter(issue => issue.status === 'open').length;
   const closedIssues = issues.filter(issue => issue.status === 'closed').length;
+  const uniqueMembersCount = getUniqueMembersCount(project.members_detail);
 
   return (
     <Layout>
@@ -123,9 +140,9 @@ export default function ProjectPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <User2 className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">
-                    {project.members_detail?.length || 0} members
+                    {uniqueMembersCount} {uniqueMembersCount === 1 ? 'member' : 'members'}
                   </span>
                 </div>
               </div>
@@ -166,10 +183,10 @@ export default function ProjectPage() {
           <div className="github-card border-border">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Issues</p>
-                <p className="text-2xl font-bold text-foreground mt-1">{issues.length}</p>
+                <p className="text-sm text-muted-foreground">Unique Members</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{uniqueMembersCount}</p>
               </div>
-              <FileText className="h-8 w-8 text-muted-foreground/30" />
+              <User2 className="h-8 w-8 text-muted-foreground/30" />
             </div>
           </div>
         </div>
@@ -236,7 +253,10 @@ export default function ProjectPage() {
 
           {/* Project Members Sidebar */}
           <div>
-            <ProjectMembers members={project.members_detail || []} />
+            <ProjectMembers 
+              members={project.members_detail || []} 
+              uniqueCount={uniqueMembersCount}
+            />
           </div>
         </div>
       </div>

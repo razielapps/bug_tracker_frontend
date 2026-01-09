@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { isAuthenticated } from '@/lib/auth';
 import Link from 'next/link'
 
+
 type LoginFormInputs = {
     username: string
     password: string
@@ -48,7 +49,7 @@ function LoginContent() {
         setError("")
 
         try {
-            const res = await axios.post("http://localhost:8000/api/auth/login/", data)
+            const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login/`, data)
             const access = res.data.access;
             const refresh = res.data.refresh;
             saveTokens(access, refresh);
@@ -87,7 +88,7 @@ function LoginContent() {
                         Sign in to OurBugTracker
                     </h1>
                     <p className="mt-2 text-muted-foreground">
-                        Enter your credentials to access your dashboard
+                        Enter your credentials to access your dashboard. For assignment of roles or test accounts please visit my github/razielapps and connent.
                     </p>
                 </div>
 
