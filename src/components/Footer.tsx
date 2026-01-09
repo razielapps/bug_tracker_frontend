@@ -12,11 +12,26 @@ import {
   Heart
 } from "lucide-react";
 import Link from "next/link";
+import { ReactNode } from "react";
+
+// Define the link type
+interface FooterLink {
+  href: string;
+  label: string;
+  icon: ReactNode | null;
+  external?: boolean;
+}
+
+// Define the section type
+interface FooterSection {
+  title: string;
+  links: FooterLink[];
+}
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   
-  const footerLinks = [
+  const footerLinks: FooterSection[] = [
     {
       title: "Product",
       links: [
