@@ -7,10 +7,32 @@ import ProjectCard from '@/components/ProjectCard';
 import { getProjects, getIssuesByProject } from '@/lib/api';
 import { Folder, CheckCircle, AlertCircle, Users, Bug } from 'lucide-react';
 
-interface ProjectWithIssues extends any {
-  issue_count?: number;
+// Define the base Project interface
+interface BaseProject {
+  id: number;
+  name: string;
+  description?: string;
+  is_active?: boolean;
+  bug_count?: number;
   open_issues?: number;
   closed_issues?: number;
+  members_count?: number;
+  members_detail?: Array<{ id: number; name: string }>;
+  // Add other base project properties as needed
+}
+
+// Define the enhanced project with issue counts
+interface ProjectWithIssues extends BaseProject {
+  issue_count: number;
+  open_issues: number;
+  closed_issues: number;
+}
+
+// Define the Issue interface for type safety
+interface Issue {
+  id: number;
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  // Add other issue properties as needed
 }
 
 export default function DashboardPage() {
@@ -27,10 +49,10 @@ export default function DashboardPage() {
         
         // Then, fetch issues for each project to get accurate counts
         const projectsWithIssueCounts = await Promise.all(
-          projectsData.map(async (project: any) => {
+          projectsData.map(async (project: BaseProject) => {
             try {
               // Fetch issues for this specific project
-              const issues = await getIssuesByProject(project.id);
+              const issues = await getIssuesByProject(project.id) as Issue[];
               
               // Calculate issue counts
               const issueCount = issues.length;
@@ -45,7 +67,7 @@ export default function DashboardPage() {
                 closed_issues: closedIssues,
                 // Preserve existing bug_count if it exists
                 bug_count: project.bug_count || issueCount
-              };
+              } as ProjectWithIssues;
             } catch (err) {
               console.error(`Error fetching issues for project ${project.id}:`, err);
               // If error, use existing counts or defaults
@@ -54,13 +76,13 @@ export default function DashboardPage() {
                 issue_count: project.bug_count || 0,
                 open_issues: project.open_issues || 0,
                 closed_issues: project.closed_issues || 0
-              };
+              } as ProjectWithIssues;
             }
           })
         );
         
         setProjects(projectsWithIssueCounts);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Failed to load projects:', err);
         setError('Failed to load projects.');
       } finally {
@@ -209,69 +231,6 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-
-        {/* Statistics Summary
-        {!loading && !error && projects.length > 0 && (
-          <div className="github-card border-border">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Project Statistics</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-foreground">Issues Distribution</span>
-                  <span className="text-sm font-bold text-foreground">{totalIssues}</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-open via-primary to-closed h-2 rounded-full" 
-                    style={{ 
-                      width: '100%',
-                      background: `linear-gradient(90deg, var(--open) ${(openIssues / totalIssues) * 100}%, var(--primary) ${(openIssues / totalIssues) * 100}% ${((openIssues + (totalIssues - openIssues - closedIssues)) / totalIssues) * 100}%, var(--closed) ${((openIssues + (totalIssues - openIssues - closedIssues)) / totalIssues) * 100}%)`
-                    }}
-                  />
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                  <span>{openIssues} open</span>
-                  <span>{totalIssues - openIssues - closedIssues} other</span>
-                  <span>{closedIssues} closed</span>
-                </div>
-              </div>
-              
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-foreground">Active Projects</span>
-                  <span className="text-sm font-bold text-green-500">{activeProjects}</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className="bg-green-500 h-2 rounded-full" 
-                    style={{ width: `${(activeProjects / totalProjects) * 100}%` }}
-                  />
-                </div>
-                <div className="text-xs text-muted-foreground mt-2">
-                  {activeProjects} of {totalProjects} projects active
-                </div>
-              </div>
-              
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-foreground">Average Issues</span>
-                  <span className="text-sm font-bold text-foreground">
-                    {totalProjects > 0 ? Math.round(totalIssues / totalProjects) : 0}
-                  </span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className="bg-merged h-2 rounded-full" 
-                    style={{ width: `${Math.min((totalIssues / (totalProjects * 20)) * 100, 100)}%` }}
-                  />
-                </div>
-                <div className="text-xs text-muted-foreground mt-2">
-                  {totalIssues} issues across {totalProjects} projects
-                </div>
-              </div>
-            </div>
-          </div>
-        )} */}
       </div>
     </Layout>
   );

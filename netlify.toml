@@ -1,0 +1,15 @@
+[build]
+  command = "npm run build:netlify"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# For Next.js
+[functions]
+  directory = ".netlify/functions/"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
