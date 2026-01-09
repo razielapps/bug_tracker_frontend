@@ -7,14 +7,13 @@ import { BugForm } from "@/components/BugForm";
 import { createBug } from "@/lib/api";
 import { useState } from "react";
 
-// Define the form data type
+// Define the form data type with optional fields
 interface BugFormData {
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
+  title?: string;
+  description?: string;
+  status?: string;
+  priority?: string;
   assigned_to?: string;
-  // Add other fields as needed
 }
 
 export default function NewIssuePage() {
@@ -33,11 +32,31 @@ export default function NewIssuePage() {
       return;
     }
 
+    // Validate required fields
+    if (!formData.title?.trim()) {
+      setError("Title is required");
+      return;
+    }
+    
+    if (!formData.description?.trim()) {
+      setError("Description is required");
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
     
     try {
-      await createBug(projectId, formData);
+      // Prepare data with defaults for required fields
+      const submissionData = {
+        title: formData.title || '',
+        description: formData.description || '',
+        status: formData.status || 'open',
+        priority: formData.priority || 'medium',
+        assigned_to: formData.assigned_to,
+      };
+      
+      await createBug(projectId, submissionData);
       router.push(`/dashboard/project/${projectId}`);
     } catch (err: unknown) {
       console.error(err);
