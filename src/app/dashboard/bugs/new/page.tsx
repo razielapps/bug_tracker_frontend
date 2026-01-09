@@ -1,10 +1,12 @@
 "use client";
-export const dynamic = 'force-dynamic';
+
+import { Suspense } from "react";
 import Layout from "@/components/Layout";
 import Link from "next/link";
 import { Bug, ArrowLeft, Clock, FolderPlus, GitBranch } from "lucide-react";
 
-export default function NewBugPage() {
+// Main content component
+function NewBugPageContent() {
   return (
     <Layout>
       <div className="max-w-2xl mx-auto">
@@ -40,7 +42,7 @@ export default function NewBugPage() {
             <h2 className="text-xl font-bold text-foreground mb-3">Feature Coming Soon!</h2>
             
             <p className="text-foreground/80 mb-6 max-w-md mx-auto">
-              We're working on making it easier to create issues directly from here. 
+              We&apos;re working on making it easier to create issues directly from here. 
               For now, please create new issues through the project they belong to.
             </p>
 
@@ -57,7 +59,7 @@ export default function NewBugPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-xs mt-0.5">2</span>
-                  Click "New Issue" within the project
+                  Click &quot;New Issue&quot; within the project
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-xs mt-0.5">3</span>
@@ -129,5 +131,23 @@ export default function NewBugPage() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+// Main export with Suspense boundary
+export default function NewBugPage() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <NewBugPageContent />
+    </Suspense>
   );
 }
