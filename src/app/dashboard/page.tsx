@@ -7,6 +7,9 @@ import ProjectCard from '@/components/ProjectCard';
 import { getProjects, getIssuesByProject, Project, Bug } from '@/lib/api';
 import { Folder, CheckCircle, AlertCircle, Users, Bug as BugIcon } from 'lucide-react';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 // Extend the Project type with additional issue count properties
 interface ProjectWithIssues extends Project {
   issue_count: number;
@@ -47,7 +50,7 @@ export default function DashboardPage() {
                 // Preserve existing bug_count if it exists
                 bug_count: project.issues_count || issueCount
               } as ProjectWithIssues;
-            } catch (err) {
+            } catch (err: unknown) {
               console.error(`Error fetching issues for project ${project.id}:`, err);
               // If error, use existing counts or defaults
               return {

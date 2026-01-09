@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import Footer from "./Footer";
@@ -13,13 +13,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             
             <div className="flex flex-col flex-1">
                 <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-                  <TopLoader />
-             
-                 
+                <TopLoader />
                   
                 <main className="flex-1 overflow-y-auto">
                     <div className="github-container py-6">
-                        {children}
+                        <Suspense fallback={
+                            <div className="flex items-center justify-center min-h-[400px]">
+                                <div className="text-center">
+                                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+                                    <p className="text-muted-foreground">Loading page content...</p>
+                                </div>
+                            </div>
+                        }>
+                            {children}
+                        </Suspense>
                     </div>
                 </main>
 
