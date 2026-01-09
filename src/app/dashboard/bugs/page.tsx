@@ -6,6 +6,9 @@ import Layout from "@/components/Layout";
 import { getAllBugs, Bug } from "@/lib/api";
 import { Bug as BugIcon, Filter, Search, Plus } from "lucide-react";
 
+// Force dynamic rendering to avoid Suspense issues
+export const dynamic = 'force-dynamic';
+
 export default function BugListPage() {
   const [bugs, setBugs] = useState<Bug[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +22,7 @@ export default function BugListPage() {
       try {
         const data = await getAllBugs();
         setBugs(data);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error(err);
         setError("Failed to load issues.");
       } finally {
