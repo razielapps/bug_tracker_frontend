@@ -4,35 +4,14 @@ import { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 import { useRouter } from 'next/navigation';
 import ProjectCard from '@/components/ProjectCard';
-import { getProjects, getIssuesByProject } from '@/lib/api';
-import { Folder, CheckCircle, AlertCircle, Users, Bug } from 'lucide-react';
+import { getProjects, getIssuesByProject, Project, Bug } from '@/lib/api';
+import { Folder, CheckCircle, AlertCircle, Users, Bug as BugIcon } from 'lucide-react';
 
-// Define the base Project interface
-interface BaseProject {
-  id: number;
-  name: string;
-  description?: string;
-  is_active?: boolean;
-  bug_count?: number;
-  open_issues?: number;
-  closed_issues?: number;
-  members_count?: number;
-  members_detail?: Array<{ id: number; name: string }>;
-  // Add other base project properties as needed
-}
-
-// Define the enhanced project with issue counts
-interface ProjectWithIssues extends BaseProject {
+// Extend the Project type with additional issue count properties
+interface ProjectWithIssues extends Project {
   issue_count: number;
   open_issues: number;
   closed_issues: number;
-}
-
-// Define the Issue interface for type safety
-interface Issue {
-  id: number;
-  status: 'open' | 'in_progress' | 'resolved' | 'closed';
-  // Add other issue properties as needed
 }
 
 export default function DashboardPage() {
@@ -49,10 +28,10 @@ export default function DashboardPage() {
         
         // Then, fetch issues for each project to get accurate counts
         const projectsWithIssueCounts = await Promise.all(
-          projectsData.map(async (project: BaseProject) => {
+          projectsData.map(async (project: Project) => {
             try {
               // Fetch issues for this specific project
-              const issues = await getIssuesByProject(project.id) as Issue[];
+              const issues = await getIssuesByProject(project.id) as Bug[];
               
               // Calculate issue counts
               const issueCount = issues.length;
@@ -66,14 +45,14 @@ export default function DashboardPage() {
                 open_issues: openIssues,
                 closed_issues: closedIssues,
                 // Preserve existing bug_count if it exists
-                bug_count: project.bug_count || issueCount
+                bug_count: project.issues_count || issueCount
               } as ProjectWithIssues;
             } catch (err) {
               console.error(`Error fetching issues for project ${project.id}:`, err);
               // If error, use existing counts or defaults
               return {
                 ...project,
-                issue_count: project.bug_count || 0,
+                issue_count: project.issues_count || 0,
                 open_issues: project.open_issues || 0,
                 closed_issues: project.closed_issues || 0
               } as ProjectWithIssues;
@@ -151,7 +130,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="w-10 h-10 bg-open/10 rounded-lg flex items-center justify-center">
-                  <Bug className="h-5 w-5 text-open" />
+                  <BugIcon className="h-5 w-5 text-open" />
                 </div>
               </div>
             </div>
