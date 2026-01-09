@@ -1,5 +1,5 @@
 "use client";
-
+export const dynamic = 'force-dynamic';
 import Layout from "@/components/Layout";
 import Link from "next/link";
 import { Bug, ArrowLeft, Clock, FolderPlus, GitBranch } from "lucide-react";
