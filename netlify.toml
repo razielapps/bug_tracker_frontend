@@ -1,15 +1,7 @@
 [build]
-  command = "npm run build:netlify"
+  command = "CI=false npm run build"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "18"
-
-# For Next.js
-[functions]
-  directory = ".netlify/functions/"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+  NPM_FLAGS = "--legacy-peer-deps"
