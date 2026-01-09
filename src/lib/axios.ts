@@ -6,7 +6,7 @@ interface AxiosRetryConfig extends AxiosRequestConfig {
 }
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://obtapp.pythonanywhere.com/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -42,11 +42,11 @@ const processQueue = (error: any, token: string | null = null): void => {
 api.interceptors.request.use(
   (config) => {
     const token = getAccessToken();
-    
+
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error) => {
@@ -61,10 +61,10 @@ api.interceptors.response.use(
   },
   async (error: AxiosError) => {
     const originalRequest = error.config as AxiosRetryConfig;
-    
+
     // Handle 401 Unauthorized errors
     if (error.response?.status === 401 && !originalRequest._retry) {
-      
+
       // If refresh is already in progress, queue the request
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -81,47 +81,47 @@ api.interceptors.response.use(
           });
         });
       }
-      
+
       // Mark request as retried and start refresh process
       originalRequest._retry = true;
       isRefreshing = true;
-      
+
       try {
         // Attempt to refresh the access token
         const newToken = await refreshAccessToken();
-        
+
         if (!newToken) {
           throw new Error('Refresh failed: No token returned');
         }
-        
+
         // Process queued requests with new token
         processQueue(null, newToken);
-        
+
         // Update the original request with new token
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
         }
-        
+
         // Retry the original request
         return api(originalRequest);
-        
+
       } catch (refreshError) {
         // Clear tokens and redirect to login on refresh failure
         processQueue(refreshError, null);
         clearTokens();
-        
+
         // Only redirect on client side
         if (typeof window !== 'undefined') {
           window.location.href = '/login';
         }
-        
+
         return Promise.reject(refreshError);
-        
+
       } finally {
         isRefreshing = false;
       }
     }
-    
+
     // For non-401 errors or already retried requests
     return Promise.reject(error);
   }
