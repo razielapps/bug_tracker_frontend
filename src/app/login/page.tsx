@@ -1,4 +1,6 @@
-"use client"
+"use client";
+
+import { Suspense } from "react";
 import { saveTokens } from '@/lib/auth';
 import { useForm } from "react-hook-form"
 import axios from "axios"
@@ -12,7 +14,8 @@ type LoginFormInputs = {
     password: string
 }
 
-export default function LoginPage() {
+// Content component that uses useSearchParams
+function LoginContent() {
     const { register, handleSubmit, formState: { errors, isValid } } = useForm<LoginFormInputs>({
         mode: 'onChange'
     })
@@ -50,13 +53,17 @@ export default function LoginPage() {
             const refresh = res.data.refresh;
             saveTokens(access, refresh);
             router.push("/dashboard")
-        } catch (err: any) {
-            if (err.response?.status === 401) {
-                setError("Invalid username or password")
-            } else if (err.response?.data?.detail) {
-                setError(err.response.data.detail)
-            } else if (err.response?.data?.non_field_errors) {
-                setError(err.response.data.non_field_errors[0])
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                if (err.response?.status === 401) {
+                    setError("Invalid username or password")
+                } else if (err.response?.data?.detail) {
+                    setError(err.response.data.detail)
+                } else if (err.response?.data?.non_field_errors) {
+                    setError(err.response.data.non_field_errors[0])
+                } else {
+                    setError("An error occurred. Please try again.")
+                }
             } else {
                 setError("An error occurred. Please try again.")
             }
@@ -67,9 +74,6 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-         
-            
-
             {/* Main Content */}
             <div className="w-full max-w-md space-y-8 mt-20">
                 <div className="text-center">
@@ -241,5 +245,23 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+// Main export with Suspense
+export default function LoginPage() {
+    return (
+        <Suspense 
+            fallback={
+                <div className="min-h-screen flex items-center justify-center bg-background">
+                    <div className="text-center">
+                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+                        <p className="text-muted-foreground">Loading login...</p>
+                    </div>
+                </div>
+            }
+        >
+            <LoginContent />
+        </Suspense>
     )
 }
