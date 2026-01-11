@@ -19,7 +19,7 @@ export function Header({ toggleSidebar }: { toggleSidebar: () => void }) {
 
   return (
     <header className="github-nav border-b border-border">
-      <div className="github-container">
+      <div className="github-container-navbar">
         <div className="flex items-center justify-between h-14">
           {/* Left side - Menu button and logo */}
           <div className="flex items-center gap-3 md:gap-6">
